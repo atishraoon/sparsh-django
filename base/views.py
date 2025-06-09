@@ -22,8 +22,6 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
-import pandas as pd
-import csv
 
 
 # import essential modules for auth
@@ -114,8 +112,7 @@ class AreaUserDownloadView(LoginRequiredMixin, View):
         # Determine format and call appropriate download function
         if format == 'csv':
             return self.download_csv(user_profiles, doctor_profiles)
-        elif format == 'xls':
-            return self.download_xls(user_profiles, doctor_profiles)
+        
 
         return HttpResponse('Invalid format', status=400)
 
@@ -136,25 +133,7 @@ class AreaUserDownloadView(LoginRequiredMixin, View):
 
         return response
 
-    def download_xls(self, user_profiles, doctor_profiles):
-        # Prepare data for user profiles or doctor profiles only, based on user_type
-        data = {
-            'Type': ['User'] * len(user_profiles) + ['Doctor'] * len(doctor_profiles),
-            'User ID': [user.id for user in user_profiles] + [doctor.id for doctor in doctor_profiles],
-            'Username': [user.uname for user in user_profiles] + [doctor.uname for doctor in doctor_profiles],
-            'Email': [user.uemail for user in user_profiles] + [doctor.uemail for doctor in doctor_profiles],
-        }
-
-        df = pd.DataFrame(data)
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="area_users.xlsx"'
-
-        # Write the DataFrame to the response using openpyxl
-        df.to_excel(response, index=False)
-
-        return response
-
+ 
 # -----------------------------------------------------------------------------------------------------
 #update / add basic details of area
 class AreaProfileForm(forms.ModelForm):
@@ -275,23 +254,7 @@ class AppointmentDownloadView(LoginRequiredMixin, View):
             ])
         return response
 
-    def download_xls(self, appointments):
-        # Create a DataFrame and then an Excel response
-        data = {
-            'Appointment ID': [appointment.appointment_id for appointment in appointments],
-            'User ': [appointment.user_profile.uname for appointment in appointments],
-            'Date': [appointment.created.strftime('%Y-%m-%d %H:%M:%S') for appointment in appointments],
-            'Status': [appointment.appointment_status for appointment in appointments],
-            'Time Slot': [appointment.time_slot.time.strftime('%H:%M') if appointment.time_slot else 'N/A' for appointment in appointments],
-        }
-        
-        df = pd.DataFrame(data)
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="appointments.xlsx"'
-        
-        # Use pandas to write the DataFrame to the response
-        df.to_excel(response, index=False)
-        return response
+    
 
 
 
