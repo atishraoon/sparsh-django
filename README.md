@@ -1,6 +1,4 @@
-Sparsh web app
-
----
+Sparsh 
 
 **Features**
 - one click appointment booking
